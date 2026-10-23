@@ -1,5 +1,10 @@
 using APINwind.Data;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Options;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,22 +12,99 @@ builder.Services.AddDbContext<ContextoBD>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("ConexionNwind"),
     ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("ConexionNwind"))));
 
+// Add services to the container.
+
+builder.Services.AddControllers();
+
+builder.Services.AddAuthentication("cookie").
+    AddCookie("cookie", o =>
+    {
+        //Creando y configurando la cookie 
+        o.Cookie.Name = "NWindAPI.auth";
+        o.Cookie.SameSite = SameSiteMode.None;
+        o.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        o.Cookie.HttpOnly = true;
+
+        //Evento que manda un error 401 al frontend en caso de que no haya iniciado sesión
+        o.Events.OnRedirectToLogin = context =>
+        {
+            if (context.Request.Path.StartsWithSegments("/api"))
+            {
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                return Task.CompletedTask;
+            }
+            context.Response.Redirect(context.RedirectUri);
+            return Task.CompletedTask;
+        };
+
+        //Evento que manda un error 403 al frontend al denegar el acceso
+        o.Events.OnRedirectToAccessDenied = context =>
+        {
+            if (context.Request.Path.StartsWithSegments("/api"))
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                return Task.CompletedTask;
+            }
+
+            context.Response.Redirect(context.RedirectUri);
+            return Task.CompletedTask;
+        };
+    })
+    .AddGoogle(googleOptions =>
+    {
+        googleOptions.SignInScheme = "cookie";
+        //Pide el ID del Cliente y el Client Secret de Google Cloud
+        googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
+        googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
+        googleOptions.SaveTokens = false;
+
+        googleOptions.Scope.Clear();
+        //Alcance que pide el nombre de perfil y el usuario a Google
+        googleOptions.Scope.Add("profile");
+        googleOptions.Scope.Add("email");
+
+        googleOptions.AuthorizationEndpoint = "https://accounts.google.com/o/oauth2/v2/auth";
+
+        googleOptions.TokenEndpoint = "https://oauth2.googleapis.com/token";
+        //Dirección de Callback configurada en Google Cloud al crear el ID de cliente
+        googleOptions.CallbackPath = "/signin-google";
+    });
+
+//Agregando la política con la que se requerirá hacer Login en la API
+//Para emplearla, en cada EndPoint que se quiera aplicar la autenticación utilizar:
+//[Authorize(Policy = "loggedIn")] al inicio de esta
+builder.Services.AddAuthorization(options =>
+{
+    //Se llama "loggedIn" y requiere el esquema de autenticación de la cookie creada
+    options.AddPolicy("loggedIn", policy =>
+    {
+        policy.AddAuthenticationSchemes("cookie")
+              .RequireAuthenticatedUser();
+    });
+});
+
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://127.0.0.1:5500", "http://localhost:5500")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy.WithOrigins(
+            "http://localhost:5500",
+            "http://127.0.0.1:5500"
+        )
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        //Se añade que permita las credenciales en la API
+        .AllowCredentials();
     });
 });
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
 var app = builder.Build();
 
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -33,6 +115,8 @@ app.UseHttpsRedirection();
 
 app.UseCors();
 
+//Habilitar autenticación y autorización
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

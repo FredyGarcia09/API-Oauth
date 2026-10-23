@@ -17,3 +17,7 @@ $RECYCLE.BIN/
 ## Environment / Secrets
 appsettings.Production.json
 *.local.json
+
+##Credenciales
+secret.cs
+secrets.json
