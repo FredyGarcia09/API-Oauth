@@ -1,7 +1,7 @@
-﻿
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace APINwind.Controllers
 {
@@ -45,6 +45,18 @@ namespace APINwind.Controllers
                 nombre,
                 email
             });
+        }
+
+        //EndPoint para cerrar sesión y eliminar la cookie de autenticación
+        [HttpGet("logout")]
+        public async Task<IActionResult> Logout([FromQuery] string? returnUrl)
+        {
+            await HttpContext.SignOutAsync("cookie");
+
+            if (string.IsNullOrWhiteSpace(returnUrl))
+                returnUrl = "http://localhost:5500/login.html";
+
+            return Redirect(returnUrl);
         }
     }
 }
