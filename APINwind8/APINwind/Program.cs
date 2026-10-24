@@ -1,3 +1,4 @@
+using APINwind.Models;
 using APINwind.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -68,6 +69,35 @@ builder.Services.AddAuthentication("cookie").
         googleOptions.TokenEndpoint = "https://oauth2.googleapis.com/token";
         //Dirección de Callback configurada en Google Cloud al crear el ID de cliente
         googleOptions.CallbackPath = "/signin-google";
+
+        //Registramos al usuario si es su pimera vez iniciando sesión con Google, usaos OnTicketReceived
+        googleOptions.Events = new Microsoft.AspNetCore.Authentication.OAuth.OAuthEvents
+        {
+            OnTicketReceived = async context =>
+            {
+                // Obtenemos la instancia de la base de datos desde los servicios de la petición HTTP actual
+                var dbContext = context.HttpContext.RequestServices.GetRequiredService<ContextoBD>();
+
+                var email = context.Principal?.FindFirst(ClaimTypes.Email)?.Value;
+                var nombre = context.Principal?.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (!string.IsNullOrEmpty(email))
+                {
+                    // Revisamos si ya existe el usuario por su correo
+                    var existeUsuario = await dbContext.Usuarios.AnyAsync(u => u.Email == email);
+
+                    if (!existeUsuario)
+                    {
+                        dbContext.Usuarios.Add(new Usuario
+                        {
+                            Email = email,
+                            Nombre = nombre ?? "Usuario de Google"
+                        });
+                        await dbContext.SaveChangesAsync();
+                    }
+                }
+            }
+        };
     });
 
 //Agregando la política con la que se requerirá hacer Login en la API

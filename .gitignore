@@ -17,3 +17,5 @@ $RECYCLE.BIN/
 ## Environment / Secrets
 appsettings.Production.json
 *.local.json
+/APINwind8/APINwind/appsettings.json
+/APINwind8/APINwind/appsettings.json
