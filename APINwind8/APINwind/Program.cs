@@ -121,10 +121,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins(
-            "http://localhost:5500",
-            "http://127.0.0.1:5500"
-        )
+        policy.SetIsOriginAllowed(origin => true)
         .AllowAnyMethod()
         .AllowAnyHeader()
         //Se añade que permita las credenciales en la API

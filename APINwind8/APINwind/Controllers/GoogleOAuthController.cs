@@ -1,7 +1,7 @@
-﻿
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace APINwind.Controllers
 {
@@ -45,6 +45,39 @@ namespace APINwind.Controllers
                 nombre,
                 email
             });
+        }
+
+        //EndPoint para obtener el nombre del usuario autenticado para saludarlo en la interfaz
+        [HttpGet("usuario")]
+        [HttpGet("nombre")]
+        public IActionResult ObtenerNombreUsuario()
+        {
+            var nombre = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(nombre))
+            {
+                return Unauthorized(new
+                {
+                    mensaje = "Aun no se inicia sesión con Google"
+                });
+            }
+
+            return Ok(new
+            {
+                nombre
+            });
+        }
+
+        //EndPoint para cerrar sesión y eliminar la cookie de autenticación
+        [HttpGet("logout")]
+        public async Task<IActionResult> Logout([FromQuery] string? returnUrl)
+        {
+            await HttpContext.SignOutAsync("cookie");
+
+            if (string.IsNullOrWhiteSpace(returnUrl))
+                returnUrl = "http://localhost:5500/login.html";
+
+            return Redirect(returnUrl);
         }
     }
 }
