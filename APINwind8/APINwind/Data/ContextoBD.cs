@@ -28,6 +28,8 @@ public partial class ContextoBD : DbContext
 
     public virtual DbSet<Supplier> Suppliers { get; set; }
 
+    public DbSet<Usuario> Usuarios { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
