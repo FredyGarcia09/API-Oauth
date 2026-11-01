@@ -1,5 +1,5 @@
 /**
- * ordenes.js - Gestión y consulta de ordenes
+ * Gestión y consulta de ordenes
  */
 
 let tablaOrdenes = null;

@@ -1,5 +1,5 @@
 /**
- * login.js - Control del inicio de sesión y registro de usuarios
+ * Control del inicio de sesión y registro de usuarios
  */
 
 // Mostrar mensaje en la caja de alerta
@@ -36,7 +36,7 @@ function verificarSesionPrevia() {
     }
 }
 
-// 1. Iniciar sesion (POST /api/Auth/login)
+// Iniciar sesion (POST /api/Auth/login)
 const frmLogin = document.getElementById('frmLogin');
 if (frmLogin) {
     frmLogin.addEventListener('submit', async (e) => {
@@ -91,7 +91,7 @@ if (frmLogin) {
     });
 }
 
-// 2. Registrarse (POST /api/Auth/register)
+// Registrarse (POST /api/Auth/register)
 const frmRegistro = document.getElementById('frmRegistro');
 if (frmRegistro) {
     frmRegistro.addEventListener('submit', async (e) => {

@@ -23,7 +23,7 @@ async function verificarSesion() {
     }
 }
 
-// Obtener el nombre del usuario desde el endpoint para saludarlo en la UI
+// Obtener el nombre del usuario para saludar en la UI
 async function cargarNombreUsuario() {
     try {
         const respuesta = await fetch(`${API_BASE_URL}/auth/GoogleOAuth/usuario`, {

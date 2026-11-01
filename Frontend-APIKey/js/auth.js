@@ -1,13 +1,13 @@
 /**
- * auth.js - Autenticación y manejo de sesión
+ * Autenticación y manejo de sesión
  */
 
-// Obtener clave activa desde localStorage
+// Obtener API key desde localStorage
 function obtenerApiKey() {
     return localStorage.getItem(STORAGE_KEYS.API_KEY);
 }
 
-// Obtener información del usuario
+// Obtener info del usuario
 function obtenerUsuario() {
     return {
         apiKey: localStorage.getItem(STORAGE_KEYS.API_KEY),
@@ -17,7 +17,7 @@ function obtenerUsuario() {
     };
 }
 
-// Persistir sesión en navegador
+// persistir sesion
 function guardarSesion(data) {
     if (data.apiKey) {
         localStorage.setItem(STORAGE_KEYS.API_KEY, data.apiKey);
@@ -92,7 +92,7 @@ async function apiFetch(url, options = {}) {
                 const errJson = await respuesta.json();
                 detalle = errJson.detail || errJson.title || detalle;
             } catch (e) {
-                // Ignore json parse error
+                //Ignorar
             }
             cerrarSesion(detalle);
             throw new Error(detalle);
@@ -146,7 +146,7 @@ async function apiFetch(url, options = {}) {
     }
 }
 
-// Formatear fechas legibles
+// Formatear fecha
 function formatearFecha(cadenaFecha) {
     if (!cadenaFecha) return 'No especificada';
     try {
@@ -200,7 +200,7 @@ function mostrarAlerta(mensaje, tipo = 'success') {
     }, 5000);
 }
 
-// Inicializar la interfaz en la barra superior
+// Interfaz en la barra superior
 function inicializarNavbarUsuario() {
     const usuario = obtenerUsuario();
     const apiKeyMaskedEl = document.getElementById('apiKeyMasked');

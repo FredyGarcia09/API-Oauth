@@ -13,7 +13,7 @@ async function verificarSesionPrevia() {
     }
 }
 
-// Iniciar redirección de login hacia la API de ASP.NET
+// Redireccion de login hacia la API
 const btnGoogleLogin = document.getElementById('btnGoogleLogin');
 if (btnGoogleLogin) {
     btnGoogleLogin.addEventListener('click', () => {

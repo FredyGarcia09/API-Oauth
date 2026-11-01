@@ -1,5 +1,5 @@
 /**
- * clientes.js - Gestion y consulta de clientes
+ * Gestion y consulta de clientes
  */
 
 let tablaClientes = null;

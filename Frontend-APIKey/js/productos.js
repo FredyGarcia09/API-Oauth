@@ -1,5 +1,5 @@
 /**
- * productos.js - Gestión del catálogo de productos
+ * Gestión del catálogo de productos
  */
 
 let tablaProductos = null;
